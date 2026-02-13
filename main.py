@@ -54,7 +54,8 @@ def generate_chart(data: BirthData):
         # Step 3: Input birth data
         jyotishyamitra.input_birthdata(
             name=data.name,
-            gender=data.gender,
+            gender_enum = jyotishyamitra.Male if data.gender == "male" else jyotishyamitra.Female
+            gender=gender_enum,
             year=year,
             month=month_enum,
             day=day,
