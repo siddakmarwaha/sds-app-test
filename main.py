@@ -15,17 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Month mapping
-MONTHS = {
-    "01": jyotishyamitra.January, "02": jyotishyamitra.February,
-    "03": jyotishyamitra.March, "04": jyotishyamitra.April,
-    "05": jyotishyamitra.May, "06": jyotishyamitra.June,
-    "07": jyotishyamitra.July, "08": jyotishyamitra.August,
-    "09": jyotishyamitra.September, "10": jyotishyamitra.October,
-    "11": jyotishyamitra.November, "12": jyotishyamitra.December,
-}
-
-
 class BirthData(BaseModel):
     name: str
     gender: str  # "male" or "female"
@@ -47,17 +36,12 @@ def generate_chart(data: BirthData):
         hour, minute = data.tob.split(":")
         sec = "0"
 
-        month_enum = MONTHS.get(month)
-        if month_enum is None:
-            raise HTTPException(status_code=400, detail=f"Invalid month: {month}")
-
         # Step 3: Input birth data
         jyotishyamitra.input_birthdata(
             name=data.name,
-            gender_enum = jyotishyamitra.Male if data.gender == "male" else jyotishyamitra.Female
-            gender=gender_enum,
+            gender=data.gender,
             year=year,
-            month=month_enum,
+            month=month,
             day=day,
             hour=hour,
             min=minute,
