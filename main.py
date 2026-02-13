@@ -53,6 +53,7 @@ def generate_chart(data: BirthData):
         )
         tz_str = f"+{data.timezone}" if data.timezone >= 0 else str(data.timezone)
         inputdata = jyotishyamitra.input_birthdata(name="Shyam Bhat", gender="male", year="1991", month=jyotishyamitra.October, day="8", hour="14", min="47", sec="9", place="Honavar", longitude="+74.4439", lattitude="+14.2798", timezone="+5.5")
+        print(inputdata)
         print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "f"year={year}, month={str(int(month))}, day={str(int(day))}, hour={str(int(hour))}, min={str(int(minute))}, "f"lon={str(data.longitude)}, lat={str(data.latitude)}, tz={tz_str}")
           
         try:
