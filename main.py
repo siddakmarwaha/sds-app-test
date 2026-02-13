@@ -78,25 +78,25 @@ def generate_chart(data: BirthData):
             pass
 
         # Fallback: generate to temp JSON file and read it
-        with tempfile.TemporaryDirectory() as tmpdir:
-            os.makedirs(output_dir, exist_ok=True)
-            jyotishyamitra.set_output(path=output_dir, filename="chart")
-            jyotishyamitra.generate_astrologicalData(birthdata)
-            
-            output_path = os.path.join(output_dir, "chart.json")
-            
-            if os.path.exists(output_path):
-                with open(output_path, "r") as f:
-                    astro_data = json.load(f)
-                return {"success": True, "data": astro_data}
-            # output_path = os.path.join(tmpdir, "chart.json")
-            # jyotishyamitra.set_output(path=tmpdir, filename="chart")
-            # jyotishyamitra.generate_astrologicalData(birthdata)
+        # with tempfile.TemporaryDirectory() as tmpdir:
+        os.makedirs(output_dir, exist_ok=True)
+        jyotishyamitra.set_output(path=output_dir, filename="chart")
+        jyotishyamitra.generate_astrologicalData(birthdata)
+        
+        output_path = os.path.join(output_dir, "chart.json")
+        
+        if os.path.exists(output_path):
+            with open(output_path, "r") as f:
+                astro_data = json.load(f)
+            return {"success": True, "data": astro_data}
+        # output_path = os.path.join(tmpdir, "chart.json")
+        # jyotishyamitra.set_output(path=tmpdir, filename="chart")
+        # jyotishyamitra.generate_astrologicalData(birthdata)
 
-            # if os.path.exists(output_path):
-            #     with open(output_path, "r") as f:
-            #         astro_data = json.load(f)
-            #     return {"success": True, "data": astro_data}
+        # if os.path.exists(output_path):
+        #     with open(output_path, "r") as f:
+        #         astro_data = json.load(f)
+        #     return {"success": True, "data": astro_data}
 
         raise HTTPException(status_code=500, detail="Failed to generate chart")
 
