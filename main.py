@@ -52,9 +52,7 @@ def generate_chart(data: BirthData):
             timezone=f"+{data.timezone}" if data.timezone >= 0 else f"-{data.timezone}",
         )
 
-        print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "
-          f"year={year}, month={str(int(month))}, day={str(int(day))}, hour={str(int(hour))}, min={str(int(minute))}, "
-          f"lon={str(data.longitude)}, lat={str(data.latitude)}, tz={f"+{data.timezone}" if data.timezone >= 0 else f"-{data.timezone}"}")
+        print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "f"year={year}, month={str(int(month))}, day={str(int(day))}, hour={str(int(hour))}, min={str(int(minute))}, "f"lon={str(data.longitude)}, lat={str(data.latitude)}, tz={data.timezone}")
           
 
         birthdata = jyotishyamitra.get_birthdata()
