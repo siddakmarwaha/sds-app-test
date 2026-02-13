@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import jyotishyamitra
+import jyotishyamitra as jsm
 import json
 import os
 import tempfile
+from datetime import datetime
 
 app = FastAPI(title="SoulDoctor Astrology API")
 
@@ -17,91 +18,95 @@ app.add_middleware(
 
 class BirthData(BaseModel):
     name: str
-    gender: str  # "male" or "female"
-    dob: str     # "YYYY-MM-DD"
-    tob: str     # "HH:MM" (24hr format)
+    gender: str
+    dob: str       # "YYYY-MM-DD"
+    tob: str       # "HH:MM"
     latitude: float
     longitude: float
-    timezone: float  # e.g. 5.5 for IST
+    timezone: float
+
+
+# Map numeric month → library constant
+MONTH_MAP = {
+    1: jsm.January,
+    2: jsm.February,
+    3: jsm.March,
+    4: jsm.April,
+    5: jsm.May,
+    6: jsm.June,
+    7: jsm.July,
+    8: jsm.August,
+    9: jsm.September,
+    10: jsm.October,
+    11: jsm.November,
+    12: jsm.December,
+}
 
 
 @app.post("/chart")
 def generate_chart(data: BirthData):
     try:
-        # Step 1: Clear previous data
-        jyotishyamitra.clear_birthdata()
+        jsm.clear_birthdata()
 
-        # Step 2: Parse date and time
-        year, month, day = data.dob.split("-")
-        hour, minute = data.tob.split(":")
-        sec = "0"
+        # Parse datetime safely
+        try:
+            dt = datetime.strptime(f"{data.dob} {data.tob}", "%Y-%m-%d %H:%M")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date/time format")
 
-        # Step 3: Input birth data
-        jyotishyamitra.input_birthdata(
+        month_constant = MONTH_MAP.get(dt.month)
+        if not month_constant:
+            raise HTTPException(status_code=400, detail="Invalid month")
+
+        # Input birth data with correct types
+        jsm.input_birthdata(
             name=data.name,
-            gender=data.gender,
-            year=year,
-            month=str(int(month)),
-            day=str(int(day)),
-            hour=str(int(hour)),
-            min=str(int(minute)),
-            sec=sec,
+            gender=data.gender.lower(),
+            year=dt.year,
+            month=month_constant,
+            day=dt.day,
+            hour=dt.hour,
+            min=dt.minute,
+            sec=0,
             place="CustomLocation",
-            longitude=str(data.longitude),
-            lattitude=str(data.latitude),  # note: library uses 'lattitude' (typo in lib)
-            timezone=f"+{data.timezone}" if data.timezone >= 0 else str(data.timezone),
+            longitude=data.longitude,
+            lattitude=data.latitude,   # library typo
+            timezone=data.timezone,
         )
-        tz_str = f"+{data.timezone}" if data.timezone >= 0 else str(data.timezone)
-        # inputdata = jyotishyamitra.input_birthdata(name="Shyam Bhat", gender="male", year="1991", month=jyotishyamitra.October, day="8", hour="14", min="47", sec="9", place="Honavar", longitude="+74.4439", lattitude="+14.2798", timezone="+5.5")
-        # print(inputdata)
-        print(jyotishyamitra.validate_birthdata())
-        print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "f"year={year}, month={str(int(month))}, day={str(int(day))}, hour={str(int(hour))}, min={str(int(minute))}, "f"lon={str(data.longitude)}, lat={str(data.latitude)}, tz={tz_str}")
-          
-        try:
-            birthdata = jyotishyamitra.get_birthdata()
-            print(f"birthdata result: {birthdata}")
-        except Exception as e:
-            print(e)
 
-        # Step 4: Validate birth data
-        birthdata = jyotishyamitra.get_birthdata()
+        # VALIDATE (you skipped this earlier)
+        jsm.validate_birthdata()
+
+        if not jsm.IsBirthdataValid():
+            raise HTTPException(status_code=400, detail="Birth data validation failed")
+
+        birthdata = jsm.get_birthdata()
         if birthdata is None:
-            raise HTTPException(status_code=400, detail="Invalid birth data")
-            
+            raise HTTPException(status_code=400, detail="Birth data not generated")
 
-        # Step 5: Generate chart — try dictionary output first
-        try:
-            astro_data = jyotishyamitra.generate_astrologicalData(birthdata)
-            print(f"OUT: {astro_data}")
-            if astro_data and isinstance(astro_data, dict):
-                return {"success": True, "data": astro_data}
-        except Exception:
-            pass
+        # Generate to temp file (most reliable method)
+        with tempfile.TemporaryDirectory() as tmpdir:
 
-        # Fallback: generate to temp JSON file and read it
-        # with tempfile.TemporaryDirectory() as tmpdir:
-        # Fallback: generate to file and read it
-        output_dir = os.path.abspath("output")
-        os.makedirs(output_dir, exist_ok=True)
-        jyotishyamitra.set_output(path=output_dir, filename="chart")
-        jyotishyamitra.generate_astrologicalData(birthdata)
-        
-        output_path = os.path.join(output_dir, "chart.json")
-        
-        if os.path.exists(output_path):
-            with open(output_path, "r") as f:
+            status = jsm.set_output(path=tmpdir, filename="chart")
+            if status != "SUCCESS":
+                raise HTTPException(status_code=500, detail="Output path setup failed")
+
+            result = jsm.generate_astrologicalData(birthdata)
+
+            # Case 1: library returned dict
+            if isinstance(result, dict):
+                return {"success": True, "data": result}
+
+            # Case 2: file mode
+            output_file = jsm.get_output()
+
+            if not output_file or not os.path.exists(output_file):
+                raise HTTPException(status_code=500, detail="Chart file not created")
+
+            with open(output_file, "r") as f:
                 astro_data = json.load(f)
+
             return {"success": True, "data": astro_data}
-        # output_path = os.path.join(tmpdir, "chart.json")
-        # jyotishyamitra.set_output(path=tmpdir, filename="chart")
-        # jyotishyamitra.generate_astrologicalData(birthdata)
-
-        # if os.path.exists(output_path):
-        #     with open(output_path, "r") as f:
-        #         astro_data = json.load(f)
-        #     return {"success": True, "data": astro_data}
-
-        raise HTTPException(status_code=500, detail="Failed to generate chart")
 
     except HTTPException:
         raise
