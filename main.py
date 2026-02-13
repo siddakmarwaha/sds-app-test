@@ -47,10 +47,17 @@ def generate_chart(data: BirthData):
             min=minute,
             sec=sec,
             place="CustomLocation",
-            longitude=data.longitude,
-            lattitude=data.latitude,  # note: library uses 'lattitude' (typo in lib)
-            timezone=data.timezone,
+            longitude=str(data.longitude),
+            lattitude=str(data.latitude),  # note: library uses 'lattitude' (typo in lib)
+            timezone=str(data.timezone),
         )
+
+        print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "
+          f"year={year}, month={month}, day={day}, hour={hour}, min={minute}, "
+          f"lon={data.longitude}, lat={data.latitude}, tz={data.timezone}")
+
+        birthdata = jyotishyamitra.get_birthdata()
+        print(f"birthdata result: {birthdata}")
 
         # Step 4: Validate birth data
         birthdata = jyotishyamitra.get_birthdata()
