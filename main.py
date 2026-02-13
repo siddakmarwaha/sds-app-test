@@ -67,6 +67,7 @@ def generate_chart(data: BirthData):
         birthdata = jyotishyamitra.get_birthdata()
         if birthdata is None:
             raise HTTPException(status_code=400, detail="Invalid birth data")
+            
 
         # Step 5: Generate chart — try dictionary output first
         try:
@@ -100,7 +101,7 @@ def generate_chart(data: BirthData):
         #         astro_data = json.load(f)
         #     return {"success": True, "data": astro_data}
 
-        raise HTTPException(status_code=500, detail="Failed to generate chart")
+        #raise HTTPException(status_code=500, detail="Failed to generate chart")
 
     except HTTPException:
         raise
