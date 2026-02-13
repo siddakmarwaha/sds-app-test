@@ -54,9 +54,11 @@ def generate_chart(data: BirthData):
         tz_str = f"+{data.timezone}" if data.timezone >= 0 else str(data.timezone)
         print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "f"year={year}, month={str(int(month))}, day={str(int(day))}, hour={str(int(hour))}, min={str(int(minute))}, "f"lon={str(data.longitude)}, lat={str(data.latitude)}, tz={tz_str}")
           
-
-        birthdata = jyotishyamitra.get_birthdata()
-        print(f"birthdata result: {birthdata}")
+        try:
+            birthdata = jyotishyamitra.get_birthdata()
+            print(f"birthdata result: {birthdata}")
+        except Exception as e:
+            print(e)
 
         # Step 4: Validate birth data
         birthdata = jyotishyamitra.get_birthdata()
