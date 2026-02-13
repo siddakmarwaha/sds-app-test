@@ -49,7 +49,7 @@ def generate_chart(data: BirthData):
             place="CustomLocation",
             longitude=str(data.longitude),
             lattitude=str(data.latitude),  # note: library uses 'lattitude' (typo in lib)
-            timezone=f"+{data.timezone}" if data.timezone >= 0 else f"-{data.timezone},
+            timezone=f"+{data.timezone}" if data.timezone >= 0 else f"-{data.timezone}",
         )
 
         print(f"input_birthdata called with: name={data.name}, gender={data.gender}, "
