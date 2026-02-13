@@ -71,6 +71,7 @@ def generate_chart(data: BirthData):
         # Step 5: Generate chart — try dictionary output first
         try:
             astro_data = jyotishyamitra.generate_astrologicalData(birthdata)
+            print(astro_data)
             if astro_data and isinstance(astro_data, dict):
                 return {"success": True, "data": astro_data}
         except Exception:
