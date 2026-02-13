@@ -101,7 +101,7 @@ def generate_chart(data: BirthData):
         #         astro_data = json.load(f)
         #     return {"success": True, "data": astro_data}
 
-        #raise HTTPException(status_code=500, detail="Failed to generate chart")
+        raise HTTPException(status_code=500, detail="Failed to generate chart")
 
     except HTTPException:
         raise
