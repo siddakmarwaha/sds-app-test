@@ -79,6 +79,8 @@ def generate_chart(data: BirthData):
 
         # Fallback: generate to temp JSON file and read it
         # with tempfile.TemporaryDirectory() as tmpdir:
+        # Fallback: generate to file and read it
+        output_dir = os.path.abspath("output")
         os.makedirs(output_dir, exist_ok=True)
         jyotishyamitra.set_output(path=output_dir, filename="chart")
         jyotishyamitra.generate_astrologicalData(birthdata)
